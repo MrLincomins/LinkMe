@@ -1,0 +1,84 @@
+version: "3"
+
+services:
+  linkme-mysql:
+    container_name: linkme-mysql
+    restart: unless-stopped
+    image: mysql:8
+    command:
+      - mysqld
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_bin
+    environment:
+      MYSQL_DATABASE: 'no-caps'
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_USER: 'no-caps'
+      MYSQL_PASSWORD: 'no-caps'
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./.docker/mysql/data:/var/lib/mysql
+      - ./.docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./.docker/mysql-files:/var/lib/mysql-files
+    networks:
+      - linkme
+
+  linkme-nginx:
+    container_name: linkme-nginx
+    restart: always
+    image: nginx
+    ports:
+      - 443:443
+      - 80:80
+    volumes:
+      - ./.docker/nginx/hosts:/etc/nginx/conf.d
+      - ./www:/var/www
+      - ./.docker/nginx/log:/var/log/nginx
+      - ./.docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - linkme
+    depends_on:
+      - linkme-php
+
+  linkme-php:
+    build:
+      context: ./.docker/php
+      dockerfile: Dockerfile
+    container_name: linkme-php
+    restart: unless-stopped
+    working_dir: /var/www/
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./www:/var/www
+      - linkme_node_modules:/var/www/node_modules
+      - ./.docker/php/php.ini:/usr/local/etc/php/conf.d/uploads.ini
+    networks:
+      - linkme
+    depends_on:
+      - linkme-mysql
+      - linkme-redis
+    environment:
+      PHP_OPCACHE_ENABLE: 1
+      PHP_OPCACHE_MEMORY_CONSUMPTION: 256
+      PHP_OPCACHE_MAX_ACCELERATED_FILES: 20000
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: 0
+
+  linkme-redis:
+    container_name: linkme-redis
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - linkme
+ 
+volumes:
+  linkme_node_modules:
+  redis_data:
+
+networks:
+  linkme:
+    driver: bridge
