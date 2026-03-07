@@ -5,6 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property mixed $id
+ * @property mixed $extra_path
+ * @property mixed $extra_query
+ * @property mixed $target_url
+ */
 class ShortLinkPassword extends Model
 {
 

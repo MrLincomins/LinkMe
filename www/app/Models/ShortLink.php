@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property mixed $redirect_type
+ * @property mixed $code
+ * @property mixed $target_url
+ * @property mixed $id
+ * @property mixed $extra_path
+ * @property mixed $extra_query
+ * @property mixed $forward_query
+ */
+
 class ShortLink extends Model
 {
     protected $fillable = [
@@ -29,8 +39,6 @@ class ShortLink extends Model
             'hit_count' => 'integer',
         ];
     }
-
-    // ── Relationships ──
 
     public function domain(): BelongsTo
     {

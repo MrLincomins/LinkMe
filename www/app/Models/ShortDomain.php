@@ -5,6 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property mixed $target_url
+ * @property mixed|null $id
+ * @property mixed $is_verified
+ * @property mixed $extra_query
+ * @property mixed $forward_query
+ * @property mixed $extra_path
+ */
 class ShortDomain extends Model
 {
     public $timestamps = false;
