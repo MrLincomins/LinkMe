@@ -70,6 +70,8 @@ class ShortLink extends Model
         return $query->where('code', $code);
     }
 
+
+
     protected static function booted(): void
     {
         static::saving(static function (ShortLink $link) {

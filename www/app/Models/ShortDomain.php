@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RedirectType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -32,6 +33,17 @@ class ShortDomain extends Model
     public function links(): HasMany
     {
         return $this->hasMany(ShortLink::class, 'domain_id');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'redirect_type' => RedirectType::class,
+            'forward_query' => 'boolean',
+            'is_active' => 'boolean',
+            'is_verified' => 'boolean',
+            'created_at' => 'datetime',
+        ];
     }
 
     public function scopeActive($query)
