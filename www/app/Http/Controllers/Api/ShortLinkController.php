@@ -1,10 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+use App\Http\Resources\Link\ShortLinkResource;
 use App\Models\ShortLink;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use App\Http\Requests\Link\StoreShortLinkRequest;
+use App\Http\Requests\Link\UpdateShortLinkRequest;
 
 class ShortLinkController extends Controller
 {
@@ -27,26 +30,30 @@ class ShortLinkController extends Controller
             $request->input('per_page', 15)
         );
 
-        return $links;
+        return ShortLinkResource::collection($links);
     }
 
-    public function store($request): JsonResponse
+    public function store(StoreShortLinkRequest $request): JsonResponse
     {
         $link = ShortLink::create($request->validated());
 
-        return $link->load('domain')->response()->setStatusCode(201);
+        return (new ShortLinkResource($link->load('domain')))
+            ->response()
+            ->setStatusCode(201);
     }
 
-    public function show(ShortLink $link): ShortLink
+    public function show(ShortLink $link): ShortLinkResource
     {
-        return $link->load(['domain', 'passwords']);
+        return new ShortLinkResource(
+            $link->load(['domain', 'passwords'])
+        );
     }
 
-    public function update($request, ShortLink $link): ShortLink
+    public function update(UpdateShortLinkRequest $request, ShortLink $link): ShortLinkResource
     {
         $link->update($request->validated());
 
-        return $link->load('domain');
+        return new ShortLinkResource($link->load('domain'));
     }
 
     public function destroy(ShortLink $link): JsonResponse

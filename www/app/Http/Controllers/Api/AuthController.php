@@ -7,10 +7,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
 
 class AuthController extends Controller
 {
-    public function register($request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
             'name' => $request->validated('name'),
@@ -28,7 +30,7 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login($request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
         $user = User::where('email', $request->validated('email'))->first();
 
