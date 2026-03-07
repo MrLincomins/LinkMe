@@ -49,4 +49,40 @@ class ShortLink extends Model
     {
         return $this->hasMany(ShortLinkPassword::class);
     }
+
+    public function getShortPathAttribute(): string
+    {
+        return "/{$this->code}/";
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeByDomain($query, int $domainId)
+    {
+        return $query->where('domain_id', $domainId);
+    }
+
+    public function scopeByCode($query, string $code)
+    {
+        return $query->where('code', $code);
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(static function (ShortLink $link) {
+            if ($link->domain_id === null) {
+                $defaultName = config('linkme.default_domain');
+                $domain = ShortDomain::where('name', $defaultName)
+                    ->active()
+                    ->first();
+
+                if ($domain) {
+                    $link->domain_id = $domain->id;
+                }
+            }
+        });
+    }
 }

@@ -33,4 +33,18 @@ class ShortDomain extends Model
     {
         return $this->hasMany(ShortLink::class, 'domain_id');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (ShortDomain $domain) {
+            if ($domain->name) {
+                $domain->name = strtolower(rtrim(trim($domain->name), '.'));
+            }
+        });
+    }
 }

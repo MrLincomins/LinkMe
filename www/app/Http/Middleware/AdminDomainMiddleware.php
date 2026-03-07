@@ -22,7 +22,7 @@ class AdminDomainMiddleware
         }
 
         $host = $request->getHost();
-        $adminDomain = config('sniplnk.admin_domain');
+        $adminDomain = config('linkme.admin_domain');
 
         if ($host === $adminDomain) {
             return $next($request);
