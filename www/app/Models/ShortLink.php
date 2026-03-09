@@ -89,4 +89,10 @@ class ShortLink extends Model
             }
         });
     }
+
+    public function visits(): HasMany
+    {
+        return $this->hasMany(LinkVisit::class);
+    }
+
 }

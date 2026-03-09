@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property mixed $extra_query
  * @property mixed $target_url
  * @property mixed $short_link_id
+ * @property mixed $max_uses
+ * @property mixed $hit_count
  */
 class ShortLinkPassword extends Model
 {

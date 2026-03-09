@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property mixed $forward_query
  * @property mixed $extra_path
  * @property mixed $redirect_type
+ * @property mixed $name
  */
 class ShortDomain extends Model
 {

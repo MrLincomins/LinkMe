@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\LinkVisited;
 use App\Models\ShortLink;
-use App\Models\ShortLinkPassword;
 use App\Services\DomainService;
 use App\Services\RedirectService;
 use Illuminate\Http\Request;
@@ -38,7 +38,14 @@ class RedirectController extends Controller
             return $this->handlePasswordProtected($request, $link);
         }
 
-        $this->incrementHitCount($link);
+        LinkVisited::dispatch(
+            $link,
+            null,
+            $request->ip(),
+            $request->userAgent(),
+            $request->headers->get('referer')
+        );
+
         $url = $this->redirectService->buildRedirectUrl($link, null, $request);
 
         return $this->redirectService->makeRedirectResponse($url, $link->redirect_type);
@@ -47,7 +54,7 @@ class RedirectController extends Controller
     public function home(Request $request)
     {
         $host = $request->getHost();
-        $adminDomain = config('linkme.admin_domain');
+        $adminDomain = config('sniplnk.admin_domain');
 
         $domain = $this->domainService->resolveByHost($host);
 
@@ -90,38 +97,27 @@ class RedirectController extends Controller
         if (!$matched) {
             return response()->view('password-prompt', [
                 'code' => $link->code,
-                'error' => 'Пароль неверный',
+                'error' => 'Incorrect password',
             ], 401);
         }
 
-        $this->incrementHitCount($link);
-        $this->incrementPasswordHitCount($matched);
-
-        $matched->refresh();
-        if ($matched->max_uses !== null && $matched->hit_count >= $matched->max_uses) {
-            $matched->update(['is_active' => false]);
-        }
+        LinkVisited::dispatch(
+            $link,
+            $matched,
+            $request->ip(),
+            $request->userAgent(),
+            $request->headers->get('referer')
+        );
 
         $url = $this->redirectService->buildRedirectUrl($link, $matched, $request);
 
         return $this->redirectService->makeRedirectResponse($url, $link->redirect_type);
     }
 
-    private function redirectDomainRoot($domain, Request $request): \Illuminate\Http\RedirectResponse
+    private function redirectDomainRoot($domain, Request $request)
     {
         $url = $this->redirectService->buildDomainRootUrl($domain, $request);
 
         return $this->redirectService->makeRedirectResponse($url, $domain->redirect_type);
     }
-
-    private function incrementHitCount(ShortLink $link): void
-    {
-        ShortLink::where('id', $link->id)->increment('hit_count');
-    }
-
-    private function incrementPasswordHitCount(ShortLinkPassword $password): void
-    {
-        ShortLinkPassword::where('id', $password->id)->increment('hit_count');
-    }
 }
-
