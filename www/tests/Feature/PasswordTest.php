@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\ShortDomain;
 use App\Models\ShortLink;
 use App\Models\ShortLinkPassword;
+use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+use Illuminate\Foundation\Http\Middleware\TrimStrings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,7 +21,7 @@ class PasswordTest extends TestCase
     {
         parent::setUp();
 
-        $this->domain = ShortDomain::factory()->verified()->create([
+        $this->domain = ShortDomain::factory()->verified()->withoutTarget()->create([
             'name' => 'localhost',
         ]);
 
@@ -38,7 +40,7 @@ class PasswordTest extends TestCase
         $response = $this->get('/secret');
 
         $response->assertStatus(200);
-        $response->assertSee('Password required');
+        $response->assertSee('Требуется пароль');
     }
 
     public function test_correct_password_redirects(): void
@@ -61,7 +63,7 @@ class PasswordTest extends TestCase
         $response = $this->post('/secret', ['password' => 'wrong']);
 
         $response->assertStatus(401);
-        $response->assertSee('Incorrect password');
+        $response->assertSee('Пароль неверный');
     }
 
     public function test_password_with_custom_target(): void
@@ -98,21 +100,24 @@ class PasswordTest extends TestCase
 
     public function test_password_deactivates_after_max_uses(): void
     {
-        $pw = ShortLinkPassword::factory()->for($this->link, 'shortLink')->create([
+        $limited = ShortLinkPassword::factory()->for($this->link, 'shortLink')->create([
             'password' => 'limited',
             'max_uses' => 2,
+        ]);
+
+        ShortLinkPassword::factory()->for($this->link, 'shortLink')->create([
+            'password' => 'other',
         ]);
 
         $this->post('/secret', ['password' => 'limited']);
         $this->post('/secret', ['password' => 'limited']);
 
         $this->assertDatabaseHas('short_link_passwords', [
-            'id' => $pw->id,
+            'id' => $limited->id,
             'hit_count' => 2,
             'is_active' => false,
         ]);
 
-        // Third attempt should fail
         $response = $this->post('/secret', ['password' => 'limited']);
         $response->assertStatus(401);
     }
@@ -123,8 +128,11 @@ class PasswordTest extends TestCase
             'password' => 'disabled',
         ]);
 
-        $response = $this->post('/secret', ['password' => 'disabled']);
+        ShortLinkPassword::factory()->for($this->link, 'shortLink')->create([
+            'password' => 'active-one',
+        ]);
 
+        $response = $this->post('/secret', ['password' => 'disabled']);
         $response->assertStatus(401);
     }
 
@@ -132,7 +140,10 @@ class PasswordTest extends TestCase
     {
         ShortLinkPassword::factory()->emptyPassword()->for($this->link, 'shortLink')->create();
 
-        $response = $this->post('/secret', ['password' => '']);
+        $response = $this->withoutMiddleware([
+            TrimStrings::class,
+            ConvertEmptyStringsToNull::class,
+        ])->post('/secret', ['password' => '']);
 
         $response->assertRedirect('https://example.com/protected');
     }

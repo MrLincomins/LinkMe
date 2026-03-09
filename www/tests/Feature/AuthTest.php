@@ -78,7 +78,7 @@ class AuthTest extends TestCase
         $response = $this->postJson('/api/logout');
 
         $response->assertOk();
-        $response->assertJsonPath('message', 'Logged out successfully.');
+        $response->assertJsonPath('message', 'Выход выполнен успешно');
     }
 
     public function test_get_current_user(): void

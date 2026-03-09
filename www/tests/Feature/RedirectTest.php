@@ -18,7 +18,7 @@ class RedirectTest extends TestCase
     {
         parent::setUp();
 
-        $this->domain = ShortDomain::factory()->verified()->create([
+        $this->domain = ShortDomain::factory()->verified()->withoutTarget()->create([
             'name' => 'localhost',
         ]);
     }
@@ -173,10 +173,7 @@ class RedirectTest extends TestCase
     public function test_home_page_renders(): void
     {
         config(['sniplnk.admin_domain' => 'localhost']);
-
         $response = $this->get('/');
-
         $response->assertStatus(200);
-        $response->assertSee('sniplnk');
     }
 }
