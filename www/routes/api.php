@@ -18,6 +18,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('links.passwords', ShortLinkPasswordController::class)
         ->except(['show']);
+
+    Route::get('links/trashed', [ShortLinkController::class, 'trashed']);
+    Route::post('links/{id}/restore', [ShortLinkController::class, 'restore']);
+    Route::delete('links/{id}/force', [ShortLinkController::class, 'forceDestroy']);
+    Route::get('links/{link}/stats', [ShortLinkController::class, 'stats']);
+
 });
 
 

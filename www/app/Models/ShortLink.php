@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property mixed $redirect_type
@@ -16,11 +17,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property mixed $extra_path
  * @property mixed $extra_query
  * @property mixed $forward_query
+ * @property mixed $hit_count
  */
 
 class ShortLink extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
     protected $fillable = [
         'code',
         'domain_id',
@@ -71,8 +74,6 @@ class ShortLink extends Model
     {
         return $query->where('code', $code);
     }
-
-
 
     protected static function booted(): void
     {

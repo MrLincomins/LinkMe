@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RedirectType;
+use App\Observers\ShortDomainObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -56,10 +57,13 @@ class ShortDomain extends Model
 
     protected static function booted(): void
     {
-        static::saving(function (ShortDomain $domain) {
+        static::saving(static function (ShortDomain $domain) {
             if ($domain->name) {
                 $domain->name = strtolower(rtrim(trim($domain->name), '.'));
             }
         });
+
+        static::observe(ShortDomainObserver::class);
     }
+
 }
