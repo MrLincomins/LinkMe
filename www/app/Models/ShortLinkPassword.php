@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property mixed $extra_path
  * @property mixed $extra_query
  * @property mixed $target_url
+ * @property mixed $short_link_id
  */
 class ShortLinkPassword extends Model
 {

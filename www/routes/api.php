@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ShortDomainController;
 use App\Http\Controllers\Api\ShortLinkController;
+use App\Http\Controllers\Api\ShortLinkPasswordController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -14,4 +15,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('links', ShortLinkController::class);
     Route::apiResource('domains', ShortDomainController::class);
+
+    Route::apiResource('links.passwords', ShortLinkPasswordController::class)
+        ->except(['show']);
 });
+
+
