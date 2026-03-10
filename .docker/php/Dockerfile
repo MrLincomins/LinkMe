@@ -35,6 +35,13 @@ RUN useradd -u 1000 -m nodeuser
 RUN mkdir -p /var/www/node_modules && \
     chown -R nodeuser:nodeuser /var/www
 
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY queue-entrypoint.sh /usr/local/bin/queue-entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/queue-entrypoint.sh
+
 WORKDIR /var/www
 
 USER nodeuser
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm"]

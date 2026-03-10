@@ -20,6 +20,11 @@ services:
       - ./.docker/mysql/data:/var/lib/mysql
       - ./.docker/mysql/my.cnf:/etc/mysql/my.cnf
       - ./.docker/mysql-files:/var/lib/mysql-files
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - linkme
 
@@ -56,8 +61,10 @@ services:
     networks:
       - linkme
     depends_on:
-      - linkme-mysql
-      - linkme-redis
+      linkme-mysql:
+        condition: service_healthy
+      linkme-redis:
+        condition: service_started
     environment:
       PHP_OPCACHE_ENABLE: 1
       PHP_OPCACHE_MEMORY_CONSUMPTION: 256
@@ -74,7 +81,28 @@ services:
       - redis_data:/data
     networks:
       - linkme
- 
+
+  linkme-queue:
+    build:
+      context: ./.docker/php
+      dockerfile: Dockerfile
+    container_name: linkme-queue
+    restart: unless-stopped
+    working_dir: /var/www/
+    entrypoint: ["/usr/local/bin/queue-entrypoint.sh"]
+    command: php artisan queue:work --tries=3 --timeout=90
+    volumes:
+      - ./www:/var/www
+    depends_on:
+      linkme-mysql:
+        condition: service_healthy
+      linkme-php:
+        condition: service_started
+      linkme-redis:
+        condition: service_started
+    networks:
+      - linkme
+
 volumes:
   linkme_node_modules:
   redis_data:
