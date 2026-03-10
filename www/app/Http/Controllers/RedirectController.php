@@ -97,7 +97,7 @@ class RedirectController extends Controller
         if (!$matched) {
             return response()->view('password-prompt', [
                 'code' => $link->code,
-                'error' => 'Incorrect password',
+                'error' => 'Неверный пароль',
             ], 401);
         }
 

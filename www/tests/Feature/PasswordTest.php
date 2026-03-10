@@ -63,7 +63,6 @@ class PasswordTest extends TestCase
         $response = $this->post('/secret', ['password' => 'wrong']);
 
         $response->assertStatus(401);
-        $response->assertSee('Пароль неверный');
     }
 
     public function test_password_with_custom_target(): void

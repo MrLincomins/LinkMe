@@ -12,7 +12,7 @@ const Admin = (function () {
         if (token) headers['Authorization'] = `Bearer ${token}`;
         const res = await fetch(`/api${path}`, { ...opts, headers });
         const data = await res.json();
-        if (res.status === 401) { token = null; user = null; clearSession(); showAuth(); throw new Error('Unauthorized'); }
+        if (res.status === 401) { token = null; user = null; clearSession(); showAuth(); throw new Error('Неверный логин или пароль'); }
         if (!res.ok) {
             const msg = data.message || Object.values(data.errors || {}).flat().join(', ') || 'Ошибка';
             throw new Error(msg);

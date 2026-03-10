@@ -103,7 +103,7 @@ class ApiShortLinkTest extends TestCase
 
         $this->deleteJson("/api/links/{$link->id}")->assertOk();
 
-        $this->assertDatabaseMissing('short_links', ['id' => $link->id]);
+        $this->assertSoftDeleted('short_links', ['id' => $link->id]);
     }
 
     public function test_duplicate_code_on_same_domain_fails(): void
